@@ -21,17 +21,11 @@ const reviewRouter = require("./routes/reviews.js");
 const userRouter = require("./routes/user.js");
 
 const dbUrl = process.env.ATLASDB_URL;
+const PORT = process.env.PORT || 3000;
 
-main()
-  .then(() => {
-    console.log("connected to db");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
-
-async function main() {
-  await mongoose.connect(dbUrl);
+if (!dbUrl) {
+  console.error("❌ ATLASDB_URL is not set");
+  process.exit(1);
 }
 
 app.set("view engine", "ejs");
@@ -49,7 +43,7 @@ const store = MongoStore.create({
   touchAfter: 24 * 3600,
 });
 
-store.on("error", () => {
+store.on("error", (err) => {
   console.log("ERROR in MONGO SESSION STORE", err);
 });
 
@@ -95,6 +89,20 @@ app.use((err, req, res, next) => {
   res.status(statusCode).render("error.ejs", { message });
 });
 
-app.listen(8080, () => {
-  console.log("Server is listening on port 8080");
-});
+async function startServer() {
+  try {
+    console.log("ATLASDB_URL:", dbUrl);
+
+    await mongoose.connect(dbUrl);
+    console.log(" Connected to db");
+
+    app.listen(PORT, () => {
+      console.log(` Server is listening on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error(" MongoDB connection error:", err);
+    process.exit(1);
+  }
+}
+
+startServer();
