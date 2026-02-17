@@ -1,9 +1,10 @@
+require("dotenv").config({ path: "../.env" });
 const mongoose = require("mongoose");
 const initData = require("./data.js");
 const Listing = require("../models/listing.js");
 const geocoder = require("../public/js/geocoder.js"); // adjust path if needed
 
-const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
+const MONGO_URL = process.env.ATLASDB_URL;
 
 main()
   .then(() => {
@@ -34,7 +35,7 @@ const initDB = async () => {
 
       const newListing = new Listing({
         ...obj,
-        owner: "683581091bb845b3b347a5e4",
+        owner: "6926f97381273b92a259cebd",
         geometry: {
           type: "Point",
           coordinates: [geoData[0].longitude, geoData[0].latitude],
